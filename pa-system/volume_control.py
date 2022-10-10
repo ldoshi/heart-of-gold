@@ -9,7 +9,7 @@ def _decrease_volume():
 
 app = flask.Flask(__name__)
 
-@app.route('/pa-system/volume_control', methods=['GET'])
+@app.route('/', methods=['GET'])
 def volume_control():
     volume_direction = flask.request.args.get('volume-direction')
     if volume_direction is not None:
