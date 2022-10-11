@@ -1,3 +1,14 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+<script>
+
+  function change_volume(value) {
+      $.post("/pa-system/volume_control", { "volume-direction": value})
+  }
+  
+</script>
+
+
 <html>
   <head>
     <title="Living Room Volume Control">
@@ -5,11 +16,7 @@
       
   </head>
   <body>
-    <a href="?volume-direction=up">
-      <div class="button volume-up"></div>
-    </a>
-    <a href="?volume-direction=down">
-      <div class="button volume-down"></div>
-    </a>
+    <div class="button volume-up" onclick="change_volume('up')"></div>
+    <div class="button volume-down" onclick="change_volume('down')"></div>
   </body>
 </html>

@@ -1,17 +1,19 @@
 import subprocess
 import flask
 
+_PACTL_COMMAND = ["pactl", "set-sink-volume", "@DEFAULT_SINK@"]
+
 def _increase_volume():
-    subprocess.run(["amixer", "-D", "pulse", "sset", "Master", "5%+"])
+    subprocess.run(_PACTL_COMMAND + ["+10%"])
 
 def _decrease_volume():
-    subprocess.run(["amixer", "-D", "pulse", "sset", "Master", "5%-"])
+    subprocess.run(_PACTL_COMMAND + ["-10%"])
 
 app = flask.Flask(__name__)
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def volume_control():
-    volume_direction = flask.request.args.get('volume-direction')
+    volume_direction = flask.request.form.get('volume-direction')
     if volume_direction is not None:
         if volume_direction == 'up':
             _increase_volume()
