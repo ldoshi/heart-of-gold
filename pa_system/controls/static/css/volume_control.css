@@ -1,0 +1,18 @@
+.button {
+    padding: 10px;
+    height: 850px;
+    width: 714px;
+    display: inline-block;
+    float: left;
+    clear: both;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.volume-up {
+    background-image:  url(../images/volume_up.jpeg);
+}
+
+.volume-down {
+    background-image:  url(../images/volume_down.jpeg);
+}
