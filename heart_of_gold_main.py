@@ -141,7 +141,7 @@ class Bridge:
 
 def main():
     bridge = Bridge(reset_code=_RESET_CODE)
-    #    bridge.register(_create_radio_plugin())
+    bridge.register(_create_radio_plugin())
     bridge.register(_create_light_controls_plugin())
     bridge.run()
 
