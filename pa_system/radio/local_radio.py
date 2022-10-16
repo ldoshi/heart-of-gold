@@ -2,7 +2,6 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import abc 
 import bisect
-import getch
 import mutagen
 import os
 import spotipy
@@ -187,12 +186,7 @@ def create_spotify_stations(spotify_client: spotipy.client.Spotify, device_id: s
     
     return stations
 
-def beep() -> None:
-    for _ in range(10):
-        print('\a')
-        time.sleep(.4)
-
-class Radio(plugin_api.Plugin:
+class Radio(plugin_api.Plugin):
 
     def __init__(self, get_stations_fn: Callable[[], List[Station]], play_keys: List[str], change_station_next_keys: List[str], change_station_previous_keys: List[str]):
         self._get_stations_fn = get_stations_fn
@@ -203,17 +197,7 @@ class Radio(plugin_api.Plugin:
 
     def reset(self) -> None:
         self._refresh_stations()
-            
-    def _refresh_stations_if_necessary(self, command: str) -> bool:
-        self._command_buffer.popleft()
-        self._command_buffer.append(command)
-        if self._command_buffer != self._refresh_stations_code:
-            return False
-
-        self._refresh_stations()
-        beep()
-        return True        
-        
+                    
     def _refresh_stations(self) -> None:
         self._current_station_index = 0
         self._stations = self._get_stations_fn()
@@ -227,7 +211,7 @@ class Radio(plugin_api.Plugin:
     def _change_station_previous(self) -> None:
         self._current_station_index = (self._current_station_index - 1) % len(self._stations)
 
-    def command(self) -> None:
+    def command(self, command: str) -> None:
         if command in self._play_keys:
             if self._current_station().is_playing():
                 self._current_station().stop()
