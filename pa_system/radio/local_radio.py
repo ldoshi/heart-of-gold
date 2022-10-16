@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Tuple
 
-import abc 
+import abc
 import bisect
 import mutagen
 import os
@@ -13,11 +13,12 @@ import plugin_api
 # The max number of times a station will "loop".
 _STATION_LOOP_FACTOR = 3
 
+
 def _get_time():
     return int(time.time() * 1e3)
 
-class TrackSeeker:
 
+class TrackSeeker:
     def __init__(self, track_durations_ms: List[int], get_time_fn=_get_time):
         self._track_index = []
         total_duration_ms = 0
@@ -41,8 +42,9 @@ class TrackSeeker:
         track_start_time_ms = start_time_ms
         if track_index:
             track_start_time_ms -= self._track_index[track_index - 1]
-            
+
         return track_index, track_start_time_ms
+
 
 class Station(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -57,15 +59,21 @@ class Station(metaclass=abc.ABCMeta):
     def stop(self) -> None:
         pass
 
-    
-class DirectoryStation(Station):
 
-    def __init__(self, content_directory: str, vlc_instance: vlc.Instance, media_list_player: vlc.MediaListPlayer):
+class DirectoryStation(Station):
+    def __init__(
+        self,
+        content_directory: str,
+        vlc_instance: vlc.Instance,
+        media_list_player: vlc.MediaListPlayer,
+    ):
         self.name = os.path.basename(content_directory)
         self._populate_track_seeker_and_media_list(content_directory, vlc_instance)
         self._media_list_player = media_list_player
 
-    def _populate_track_seeker_and_media_list(self, content_directory: str, vlc_instance: vlc.Instance) -> None:
+    def _populate_track_seeker_and_media_list(
+        self, content_directory: str, vlc_instance: vlc.Instance
+    ) -> None:
         filepaths = []
         for path, _, files in os.walk(content_directory):
             for name in files:
@@ -106,17 +114,21 @@ class DirectoryStation(Station):
 
 
 class SpotifyStation(Station):
-
-    def __init__(self, spotify_client: spotipy.client.Spotify, device_id: str, playlist: Dict[str, Any]):
-        self.name = playlist['name']
+    def __init__(
+        self,
+        spotify_client: spotipy.client.Spotify,
+        device_id: str,
+        playlist: Dict[str, Any],
+    ):
+        self.name = playlist["name"]
         self._spotify_client = spotify_client
         self._device_id = device_id
-        self._playlist_uri = playlist['uri']
+        self._playlist_uri = playlist["uri"]
 
         track_durations_ms = []
-        tracks = spotify_client.playlist(playlist['id'], fields="tracks")
-        for track in tracks['tracks']['items']:
-            track_durations_ms.append(track['track']['duration_ms'])
+        tracks = spotify_client.playlist(playlist["id"], fields="tracks")
+        for track in tracks["tracks"]["items"]:
+            track_durations_ms.append(track["track"]["duration_ms"])
         self._track_seeker = TrackSeeker(track_durations_ms)
 
     def play(self) -> None:
@@ -127,7 +139,8 @@ class SpotifyStation(Station):
                 device_id=self._device_id,
                 context_uri=self._playlist_uri,
                 offset={"position": track_index},
-                position_ms=track_start_time_ms)
+                position_ms=track_start_time_ms,
+            )
         except spotipy.exceptions.SpotifyException as e:
             if e.code == -1 and e.http_status == 403:
                 # This occurs if the command player state already
@@ -143,7 +156,7 @@ class SpotifyStation(Station):
         while True:
             try:
                 currently_playing = self._spotify_client.currently_playing()
-                return not currently_playing or currently_playing['is_playing']
+                return not currently_playing or currently_playing["is_playing"]
             except:
                 pass
 
@@ -162,54 +175,75 @@ class SpotifyStation(Station):
 
 def create_directory_stations(stations_directory: str) -> List[Station]:
     stations = []
-    
+
     vlc_instance = vlc.Instance()
     media_list_player = vlc.MediaListPlayer()
     for station_name in sorted(os.listdir(stations_directory)):
         station_path = os.path.join(stations_directory, station_name)
-        stations.append(DirectoryStation(
-            content_directory=station_path,
-            vlc_instance=vlc_instance,
-            media_list_player=media_list_player))
+        stations.append(
+            DirectoryStation(
+                content_directory=station_path,
+                vlc_instance=vlc_instance,
+                media_list_player=media_list_player,
+            )
+        )
 
     return stations
 
-def create_spotify_stations(spotify_client: spotipy.client.Spotify, device_id: str, playlist_name_prefix_filter="radio") -> List[Station]:
+
+def create_spotify_stations(
+    spotify_client: spotipy.client.Spotify,
+    device_id: str,
+    playlist_name_prefix_filter="radio",
+) -> List[Station]:
     stations = []
     playlists = spotify_client.current_user_playlists()
-    for playlist in playlists['items']:
-        if playlist['name'].startswith(playlist_name_prefix_filter):
-            stations.append(SpotifyStation(
-                spotify_client=spotify_client,
-                device_id=device_id,
-                playlist=playlist))        
-    
+    for playlist in playlists["items"]:
+        if playlist["name"].startswith(playlist_name_prefix_filter):
+            stations.append(
+                SpotifyStation(
+                    spotify_client=spotify_client,
+                    device_id=device_id,
+                    playlist=playlist,
+                )
+            )
+
     return stations
 
-class Radio(plugin_api.Plugin):
 
-    def __init__(self, get_stations_fn: Callable[[], List[Station]], play_keys: List[str], change_station_next_keys: List[str], change_station_previous_keys: List[str]):
+class Radio(plugin_api.Plugin):
+    def __init__(
+        self,
+        get_stations_fn: Callable[[], List[Station]],
+        play_keys: List[str],
+        change_station_next_keys: List[str],
+        change_station_previous_keys: List[str],
+    ):
         self._get_stations_fn = get_stations_fn
-        self._refresh_stations() 
+        self._refresh_stations()
         self._play_keys = play_keys
         self._change_station_next_keys = change_station_next_keys
         self._change_station_previous_keys = change_station_previous_keys
 
     def reset(self) -> None:
         self._refresh_stations()
-                    
+
     def _refresh_stations(self) -> None:
         self._current_station_index = 0
         self._stations = self._get_stations_fn()
-        
+
     def _current_station(self) -> Station:
         return self._stations[self._current_station_index]
-        
+
     def _change_station_next(self) -> None:
-        self._current_station_index = (self._current_station_index + 1) % len(self._stations)
-        
+        self._current_station_index = (self._current_station_index + 1) % len(
+            self._stations
+        )
+
     def _change_station_previous(self) -> None:
-        self._current_station_index = (self._current_station_index - 1) % len(self._stations)
+        self._current_station_index = (self._current_station_index - 1) % len(
+            self._stations
+        )
 
     def command(self, command: str) -> None:
         if command in self._play_keys:
@@ -224,7 +258,7 @@ class Radio(plugin_api.Plugin):
                 self._current_station().stop()
             self._change_station_previous()
             if is_playing:
-                self._current_station().play()   
+                self._current_station().play()
         elif command in self._change_station_next_keys:
             is_playing = self._current_station().is_playing()
             if is_playing:

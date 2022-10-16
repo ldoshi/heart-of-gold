@@ -6,8 +6,8 @@ from typing import Callable, List
 
 import local_radio
 
-class TrackSeekerTest(unittest.TestCase):
 
+class TrackSeekerTest(unittest.TestCase):
     @parameterized.expand(
         [
             ("Single Track", [100], lambda: 10, 0, 10),
@@ -20,13 +20,19 @@ class TrackSeekerTest(unittest.TestCase):
         ]
     )
     def test_seek(
-            self, name, track_durations_ms: List[int], get_time_fn: Callable[[], int], expected_track_index: int, expected_track_start_time_ms: int
+        self,
+        name,
+        track_durations_ms: List[int],
+        get_time_fn: Callable[[], int],
+        expected_track_index: int,
+        expected_track_start_time_ms: int,
     ):
-        track_index, track_start_time_ms = local_radio.TrackSeeker(track_durations_ms=track_durations_ms, get_time_fn=get_time_fn).seek()
+        track_index, track_start_time_ms = local_radio.TrackSeeker(
+            track_durations_ms=track_durations_ms, get_time_fn=get_time_fn
+        ).seek()
         self.assertEqual(track_index, expected_track_index)
         self.assertEqual(track_start_time_ms, expected_track_start_time_ms)
 
-        
+
 if __name__ == "__main__":
     unittest.main()
-
