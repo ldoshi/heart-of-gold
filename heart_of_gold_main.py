@@ -42,16 +42,16 @@ def _beep() -> None:
 
 
 def _create_radio_plugin() -> plugin_api.Plugin:
-    # spotify_client = spotipy.Spotify(auth_manager=spotipy.oauth2.SpotifyOAuth(
-    #     client_id=_RADIO_SPOTIPY_CLIENT_ID,
-    #     client_secret=_RADIO_SPOTIPY_CLIENT_SECRET,
-    #     redirect_uri=_RADIO_SPOTIPY_REDIRECT_URI,
-    #     scope=_RADIO_SPOTIFY_SCOPE))
+    spotify_client = spotipy.Spotify(auth_manager=spotipy.oauth2.SpotifyOAuth(
+        client_id=_RADIO_SPOTIPY_CLIENT_ID,
+        client_secret=_RADIO_SPOTIPY_CLIENT_SECRET,
+        redirect_uri=_RADIO_SPOTIPY_REDIRECT_URI,
+        scope=_RADIO_SPOTIFY_SCOPE))
 
     def get_stations() -> List[local_radio.Station]:
         stations = []
         stations.extend(local_radio.create_directory_stations(_RADIO_STATIONS_DIRECTORY))
-#        stations.extend(local_radio.create_spotify_stations(spotify_client, _RADIO_SPOTIFY_DEVICE_ID))
+        stations.extend(local_radio.create_spotify_stations(spotify_client, _RADIO_SPOTIFY_DEVICE_ID))
         return stations
 
     
