@@ -4,7 +4,7 @@ import unittest
 from parameterized import parameterized
 from typing import Callable, List
 
-import local_radio
+from pa_system.radio import local_radio
 
 
 class TrackSeekerTest(unittest.TestCase):
