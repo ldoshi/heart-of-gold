@@ -3,6 +3,5 @@ Flask==2.2.2
 mutagen==1.45.1
 pycryptodomex==3.15.0
 python-vlc==3.0.16120
-pytype==2022.6.23
 spotipy==2.20.0
 wyze-sdk==1.6.0
