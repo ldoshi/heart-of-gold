@@ -3,11 +3,21 @@ import wyze_sdk
 
 
 class LightControls(plugin_api.Plugin):
-    def __init__(self, wyze_client: wyze_sdk.Client, on_key: str, off_key: str):
+    def __init__(
+        self,
+        wyze_client: wyze_sdk.Client,
+        nickname_prefix: str,
+        on_key: str,
+        off_key: str,
+    ):
         self._wyze_client = wyze_client
         self._on_key = on_key
         self._off_key = off_key
-        self._bulbs = self._wyze_client.bulbs.list()
+        self._bulbs = [
+            bulb
+            for bulb in self._wyze_client.bulbs.list()
+            if bulb.nickname.startswith(nickname_prefix)
+        ]
 
     def _turn_on(self) -> None:
         for bulb in self._bulbs:

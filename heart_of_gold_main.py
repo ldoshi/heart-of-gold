@@ -19,12 +19,14 @@ _RESET_CODE = "qwedcxza"
 ## Commands
 ################################################################################
 
-_RADIO_PLAY_KEYS = ["a", "s", "d"]
-_RADIO_CHANGE_STATION_PREVIOUS_KEYS = ["q", "w", "e"]
-_RADIO_CHANGE_STATION_NEXT_KEYS = ["z", "x", "c"]
+_RADIO_PLAY_KEYS = ["a", "s"]
+_RADIO_CHANGE_STATION_PREVIOUS_KEYS = ["q", "w"]
+_RADIO_CHANGE_STATION_NEXT_KEYS = ["z", "x"]
 
-_LIGHT_CONTROLS_ON_KEY = "r"
-_LIGHT_CONTROLS_OFF_KEY = "f"
+_LIGHT_CONTROLS_BED_ROOM_ON_KEY = "r"
+_LIGHT_CONTROLS_BED_ROOM_OFF_KEY = "f"
+_LIGHT_CONTROLS_LIVING_ROOM_ON_KEY = "e"
+_LIGHT_CONTROLS_LIVING_ROOM_OFF_KEY = "d"
 
 ################################################################################
 ## Radio Constants
@@ -55,6 +57,9 @@ _RADIO_SPOTIFY_DEVICE_ID = "ENTER HERE"
 ################################################################################
 ## Light Controls Constants
 ################################################################################
+
+_LIGHT_CONTROLS_BED_ROOM_NICKNAME_PREFIX = "bed_room"
+_LIGHT_CONTROLS_LIVING_ROOM_NICKNAME_PREFIX = "living_room"
 
 _LIGHT_CONTROLS_EMAIL = "ENTER HERE"
 _LIGHT_CONTROLS_PASSWORD = "ENTER HERE"
@@ -96,15 +101,24 @@ def _create_radio_plugin() -> plugin_api.Plugin:
     )
 
 
-def _create_light_controls_plugin() -> plugin_api.Plugin:
+def _create_light_controls_plugins() -> List[plugin_api.Plugin]:
     wyze_client = wyze_sdk.Client(
         email=_LIGHT_CONTROLS_EMAIL, password=_LIGHT_CONTROLS_PASSWORD
     )
-    return light_controls.LightControls(
-        wyze_client=wyze_client,
-        on_key=_LIGHT_CONTROLS_ON_KEY,
-        off_key=_LIGHT_CONTROLS_OFF_KEY,
-    )
+    return [
+        light_controls.LightControls(
+            wyze_client=wyze_client,
+            nickname_prefix=_LIGHT_CONTROLS_BED_ROOM_NICKNAME_PREFIX,
+            on_key=_LIGHT_CONTROLS_BED_ROOM_ON_KEY,
+            off_key=_LIGHT_CONTROLS_BED_ROOM_OFF_KEY,
+        ),
+        light_controls.LightControls(
+            wyze_client=wyze_client,
+            nickname_prefix=_LIGHT_CONTROLS_LIVING_ROOM_NICKNAME_PREFIX,
+            on_key=_LIGHT_CONTROLS_LIVING_ROOM_ON_KEY,
+            off_key=_LIGHT_CONTROLS_LIVING_ROOM_OFF_KEY,
+        ),
+    ]
 
 
 class Bridge:
@@ -142,7 +156,8 @@ class Bridge:
 def main():
     bridge = Bridge(reset_code=_RESET_CODE)
     bridge.register(_create_radio_plugin())
-    bridge.register(_create_light_controls_plugin())
+    for light_control_plugin in _create_light_controls_plugins():
+        bridge.register(light_control_plugin)
     bridge.run()
 
 
