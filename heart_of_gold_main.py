@@ -27,6 +27,14 @@ _LIGHT_CONTROLS_BED_ROOM_ON_KEY = "r"
 _LIGHT_CONTROLS_BED_ROOM_OFF_KEY = "f"
 _LIGHT_CONTROLS_LIVING_ROOM_ON_KEY = "e"
 _LIGHT_CONTROLS_LIVING_ROOM_OFF_KEY = "d"
+_LIGHT_CONTROLS_LIVING_ROOM_COLOR_NEXT_KEY = "c"
+_LIGHT_CONTROLS_LIVING_ROOM_COLOR_LIST = [
+    light_controls.LightingColor(type=light_controls.ColorType.TEMPERATURE, value=3800),
+    light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="ff0000"),
+    light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="ffff00"),
+    light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="00ff00"),
+    light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="0000ff"),
+    ]
 
 ################################################################################
 ## Radio Constants
@@ -117,6 +125,8 @@ def _create_light_controls_plugins() -> List[plugin_api.Plugin]:
             nickname_prefix=_LIGHT_CONTROLS_LIVING_ROOM_NICKNAME_PREFIX,
             on_key=_LIGHT_CONTROLS_LIVING_ROOM_ON_KEY,
             off_key=_LIGHT_CONTROLS_LIVING_ROOM_OFF_KEY,
+            color_next_key=_LIGHT_CONTROLS_LIVING_ROOM_COLOR_NEXT_KEY,
+            color_list=_LIGHT_CONTROLS_LIVING_ROOM_COLOR_LIST
         ),
     ]
 
