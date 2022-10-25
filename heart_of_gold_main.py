@@ -34,7 +34,7 @@ _LIGHT_CONTROLS_LIVING_ROOM_COLOR_LIST = [
     light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="ffff00"),
     light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="00ff00"),
     light_controls.LightingColor(type=light_controls.ColorType.COLOR, value="0000ff"),
-    ]
+]
 
 ################################################################################
 ## Radio Constants
@@ -126,7 +126,7 @@ def _create_light_controls_plugins() -> List[plugin_api.Plugin]:
             on_key=_LIGHT_CONTROLS_LIVING_ROOM_ON_KEY,
             off_key=_LIGHT_CONTROLS_LIVING_ROOM_OFF_KEY,
             color_next_key=_LIGHT_CONTROLS_LIVING_ROOM_COLOR_NEXT_KEY,
-            color_list=_LIGHT_CONTROLS_LIVING_ROOM_COLOR_LIST
+            color_list=_LIGHT_CONTROLS_LIVING_ROOM_COLOR_LIST,
         ),
     ]
 
