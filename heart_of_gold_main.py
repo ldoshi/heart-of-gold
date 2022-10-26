@@ -3,8 +3,8 @@
 from typing import List
 
 import collections
-import getch
 import spotipy
+import pynput
 import time
 import wyze_sdk
 
@@ -145,22 +145,20 @@ class Bridge:
         self._command_buffer.append(command)
         return self._command_buffer == self._reset_code
 
-    def run(self):
-        while True:
-            try:
-                command = getch.getch().lower()
-
-                if self._reset_requested(command):
-                    for plugin in self._plugins:
-                        plugin.reset()
-                    _beep()
-                    continue
-
+    def command(self, key: str):
+        try:
+            command = key.char.lower()
+            if self._reset_requested(command):
                 for plugin in self._plugins:
-                    plugin.command(command)
+                    plugin.reset()
+                _beep()
+                return
 
-            except Exception as e:
-                print(e)
+            for plugin in self._plugins:
+                plugin.command(command)
+
+        except Exception as e:
+            print(e)
 
 
 def main():
@@ -168,7 +166,9 @@ def main():
     bridge.register(_create_radio_plugin())
     for light_control_plugin in _create_light_controls_plugins():
         bridge.register(light_control_plugin)
-    bridge.run()
+
+    with pynput.keyboard.Listener(on_release=bridge.command) as listener:
+        listener.join()
 
 
 if __name__ == "__main__":
