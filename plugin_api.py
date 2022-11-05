@@ -1,4 +1,5 @@
-import abc 
+import abc
+
 
 class Plugin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -9,4 +10,6 @@ class Plugin(metaclass=abc.ABCMeta):
     def reset(self) -> None:
         pass
 
-    
+    # TODO(lyric): Implement a plugin schedule.
+    def is_active(self) -> bool:
+        return True

@@ -1,5 +1,6 @@
 from typing import List, NamedTuple, Optional, Union
 
+import datetime
 import enum
 import plugin_api
 import wyze_sdk
@@ -24,6 +25,8 @@ class LightControls(plugin_api.Plugin):
         off_key: str,
         color_next_key: Optional[str] = None,
         color_list: Optional[List[LightingColor]] = None,
+        active_time_start: Optional[datetime.time] = None,
+        active_time_end: Optional[datetime.time] = None,
     ):
         self._wyze_client = wyze_client
         self._on_key = on_key
@@ -38,6 +41,9 @@ class LightControls(plugin_api.Plugin):
             for bulb in self._wyze_client.bulbs.list()
             if bulb.nickname.startswith(nickname_prefix)
         ]
+
+        self._active_time_start = None
+        self._active_time_end = None
 
     def _turn_on(self) -> None:
         for bulb in self._bulbs:
@@ -84,3 +90,10 @@ class LightControls(plugin_api.Plugin):
 
     def reset(self) -> None:
         self._turn_off()
+
+    def is_active(self) -> bool:
+        if self._active_time_start is None:
+            return True
+
+        current_time = datetime.datetime.now().time()
+        return self._active_time_start <= current_time <= self._active_time_end
