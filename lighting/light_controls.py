@@ -42,8 +42,8 @@ class LightControls(plugin_api.Plugin):
             if bulb.nickname.startswith(nickname_prefix)
         ]
 
-        self._active_time_start = None
-        self._active_time_end = None
+        self._active_time_start = active_time_start
+        self._active_time_end = active_time_end
 
     def _turn_on(self) -> None:
         for bulb in self._bulbs:

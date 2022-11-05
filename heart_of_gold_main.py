@@ -120,7 +120,7 @@ def _create_light_controls_plugins() -> List[plugin_api.Plugin]:
             nickname_prefix=_LIGHT_CONTROLS_BED_ROOM_NICKNAME_PREFIX,
             on_key=_LIGHT_CONTROLS_BED_ROOM_ON_KEY,
             off_key=_LIGHT_CONTROLS_BED_ROOM_OFF_KEY,
-            active_time_start=datetime.time(3, 0, 0),
+            active_time_start=datetime.time(4, 0, 0),
             active_time_end=datetime.time(20, 30, 0),
         ),
         light_controls.LightControls(
