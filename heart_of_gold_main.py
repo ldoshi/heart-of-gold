@@ -5,6 +5,7 @@ from typing import Callable, List
 import collections
 import datetime
 import functools
+import os
 import spotipy
 import pynput
 import threading
@@ -48,9 +49,15 @@ _RADIO_STATIONS_DIRECTORY = (
 )
 
 # Spotify access.
-_RADIO_SPOTIPY_CLIENT_ID = "ENTER HERE"
-_RADIO_SPOTIPY_CLIENT_SECRET = "ENTER HERE"
-_RADIO_SPOTIPY_REDIRECT_URI = "http://localhost"
+_RADIO_SPOTIPY_CLIENT_ID = os.getenv(
+    "RADIO_SPOTIPY_CLIENT_ID", os.getenv("SPOTIPY_CLIENT_ID")
+)
+_RADIO_SPOTIPY_CLIENT_SECRET = os.getenv(
+    "RADIO_SPOTIPY_CLIENT_SECRET", os.getenv("SPOTIPY_CLIENT_SECRET")
+)
+_RADIO_SPOTIPY_REDIRECT_URI = os.getenv(
+    "RADIO_SPOTIPY_REDIRECT_URI", os.getenv("SPOTIPY_REDIRECT_URI", "http://127.0.0.1:8888/callback")
+)
 _RADIO_SPOTIFY_SCOPE = [
     "user-modify-playback-state",
     "user-read-playback-state",
@@ -63,7 +70,7 @@ _RADIO_SPOTIFY_SCOPE = [
 ]
 
 # Spotify player.
-_RADIO_SPOTIFY_DEVICE_ID = "ENTER HERE"
+_RADIO_SPOTIFY_DEVICE_ID = "a582ca56f0f370cf4eae00f3f1fccaad174b15bb"
 
 ################################################################################
 ## Light Controls Constants
@@ -108,6 +115,12 @@ def _beep() -> None:
 
 
 def _create_radio_plugin() -> plugin_api.Plugin:
+    if not _RADIO_SPOTIPY_CLIENT_ID or not _RADIO_SPOTIPY_CLIENT_SECRET:
+        raise ValueError(
+            "Missing Spotify credentials. Set RADIO_SPOTIPY_CLIENT_ID and "
+            "RADIO_SPOTIPY_CLIENT_SECRET, or the SPOTIPY_* equivalents."
+        )
+
     spotify_client = spotipy.Spotify(
         auth_manager=spotipy.oauth2.SpotifyOAuth(
             client_id=_RADIO_SPOTIPY_CLIENT_ID,
@@ -119,9 +132,9 @@ def _create_radio_plugin() -> plugin_api.Plugin:
 
     def get_stations() -> List[local_radio.Station]:
         stations = []
-        stations.extend(
-            local_radio.create_directory_stations(_RADIO_STATIONS_DIRECTORY)
-        )
+#        stations.extend(
+ #           local_radio.create_directory_stations(_RADIO_STATIONS_DIRECTORY)
+ #       )
         stations.extend(
             local_radio.create_spotify_stations(
                 spotify_client, _RADIO_SPOTIFY_DEVICE_ID
@@ -207,8 +220,8 @@ def main():
     bridge = Bridge(reset_code=_RESET_CODE)
     daily_task_manager = DailyTaskManager()
     bridge.register(_create_radio_plugin())
-    for light_control_plugin in _create_light_controls_plugins(daily_task_manager):
-        bridge.register(light_control_plugin)
+#    for light_control_plugin in _create_light_controls_plugins(daily_task_manager):
+#        bridge.register(light_control_plugin)
 
     daily_task_manager.start()
     with pynput.keyboard.Listener(on_release=bridge.command) as listener:
