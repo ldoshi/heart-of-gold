@@ -2,7 +2,7 @@ from typing import List, NamedTuple, Optional, Union
 
 import datetime
 import enum
-import plugin_api
+import heart_of_gold.plugin_api as plugin_api
 import wyze_sdk
 
 

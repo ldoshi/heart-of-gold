@@ -7,15 +7,14 @@ import datetime
 import functools
 import os
 import spotipy
-import pynput
 import threading
 import time
 import wyze_sdk
 
-from lighting import light_controls
-from pa_system.radio import local_radio
+from heart_of_gold.lighting import light_controls
+from heart_of_gold.pa_system.radio import local_radio
 
-import plugin_api
+import heart_of_gold.plugin_api as plugin_api
 
 _RESET_CODE = "qwedcxza"
 
@@ -130,6 +129,10 @@ def _create_radio_plugin() -> plugin_api.Plugin:
         )
     )
 
+    devices = spotify_client.devices()
+    for d in devices['devices']:
+        print(f"Name: {d['name']} with id: {d['id']}")
+
     def get_stations() -> List[local_radio.Station]:
         stations = []
 #        stations.extend(
@@ -201,7 +204,7 @@ class Bridge:
 
     def command(self, key: str):
         try:
-            command = key.char.lower()
+            command = key.lower()
             if self._reset_requested(command):
                 for plugin in self._plugins:
                     plugin.reset()
@@ -215,19 +218,10 @@ class Bridge:
         except Exception as e:
             print(e)
 
-
-def main():
+# Currently supports radio-only.             
+def make_bridge() -> Bridge:
     bridge = Bridge(reset_code=_RESET_CODE)
-    daily_task_manager = DailyTaskManager()
     bridge.register(_create_radio_plugin())
-#    for light_control_plugin in _create_light_controls_plugins(daily_task_manager):
-#        bridge.register(light_control_plugin)
-
-    daily_task_manager.start()
-    with pynput.keyboard.Listener(on_release=bridge.command) as listener:
-        listener.join()
-
-
-if __name__ == "__main__":
-    while True:
-        main()
+    return bridge
+    
+            

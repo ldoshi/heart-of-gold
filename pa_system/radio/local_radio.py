@@ -6,9 +6,8 @@ import mutagen
 import os
 import spotipy
 import time
-import vlc
 
-import plugin_api
+import heart_of_gold.plugin_api as plugin_api
 
 # The max number of times a station will "loop".
 _STATION_LOOP_FACTOR = 3
@@ -60,59 +59,6 @@ class Station(metaclass=abc.ABCMeta):
         pass
 
 
-class DirectoryStation(Station):
-    def __init__(
-        self,
-        content_directory: str,
-        vlc_instance: vlc.Instance,
-        media_list_player: vlc.MediaListPlayer,
-    ):
-        self.name = os.path.basename(content_directory)
-        self._populate_track_seeker_and_media_list(content_directory, vlc_instance)
-        self._media_list_player = media_list_player
-
-    def _populate_track_seeker_and_media_list(
-        self, content_directory: str, vlc_instance: vlc.Instance
-    ) -> None:
-        filepaths = []
-        for path, _, files in os.walk(content_directory):
-            for name in files:
-                filepaths.append(os.path.join(path, name))
-
-        # The order of play is defined by sorting the files by
-        # name. For best results, do not mix subdirectories and files
-        # in the same parent directory.
-        filepaths.sort()
-
-        # The track durations provided to TrackSeeker must follow the
-        # same order as self._media_list. The self._media_list
-        # additionally repeats files _STATION_LOOP_FACTOR times as a
-        # simple way of implementing looping the playlist a ~fixed
-        # number of times.
-        track_durations_ms = []
-        for filepath in filepaths:
-            track_durations_ms.append(int(mutagen.File(filepath).info.length * 1e3))
-        self._track_seeker = TrackSeeker(track_durations_ms)
-
-        self._media_list = vlc_instance.media_list_new()
-        for _ in range(_STATION_LOOP_FACTOR):
-            for filepath in filepaths:
-                self._media_list.add_media(vlc_instance.media_new(filepath))
-
-    def play(self) -> None:
-        self._media_list_player.set_media_list(self._media_list)
-
-        track_index, track_start_time_ms = self._track_seeker.seek()
-        self._media_list_player.play_item_at_index(track_index)
-        self._media_list_player.get_media_player().set_time(track_start_time_ms)
-
-    def is_playing(self) -> bool:
-        return self._media_list_player.is_playing()
-
-    def stop(self) -> None:
-        self._media_list_player.stop()
-
-
 class SpotifyStation(Station):
     def __init__(
         self,
@@ -135,6 +81,7 @@ class SpotifyStation(Station):
         track_index, track_start_time_ms = self._track_seeker.seek()
 
         try:
+            print("Attempting to play ", self.name)
             self._spotify_client.start_playback(
                 device_id=self._device_id,
                 context_uri=self._playlist_uri,
@@ -171,24 +118,6 @@ class SpotifyStation(Station):
                 pass
             else:
                 raise e
-
-
-def create_directory_stations(stations_directory: str) -> List[Station]:
-    stations = []
-
-    vlc_instance = vlc.Instance()
-    media_list_player = vlc.MediaListPlayer()
-    for station_name in sorted(os.listdir(stations_directory)):
-        station_path = os.path.join(stations_directory, station_name)
-        stations.append(
-            DirectoryStation(
-                content_directory=station_path,
-                vlc_instance=vlc_instance,
-                media_list_player=media_list_player,
-            )
-        )
-
-    return stations
 
 
 def create_spotify_stations(
